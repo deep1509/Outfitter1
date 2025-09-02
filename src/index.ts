@@ -3,10 +3,11 @@ import { askDescription, pickSuggestion } from './ui/prompt.js';
 import { parseIntent } from './agent/intent.js';
 import { plan } from './agent/plan.js';
 import { buildCartLink } from './shops/culturekings/cartLink.js';
+import { withTrace } from './core/trace.js';
 
 const log = pino({ level: 'info' });
 
-async function main() {
+async function _main() {
   console.log('Culture Kings outfitter demo. Uses public endpoints only.\n');
 
   const desc = await askDescription();
@@ -27,7 +28,8 @@ async function main() {
   if (pants?.pick?.variantId) items.push({ variantId: pants.pick.variantId, quantity: 1 });
 
   if (items.length) {
-    const link = buildCartLink(items);
+    const tracedBuild = withTrace('buildCartLink', async (its: typeof items) => buildCartLink(its));
+    const link = await tracedBuild(items);
     console.log('\nCart link:', link.url);
   } else {
     if (shirt) console.log('Shirt page:', shirt.product.url);
@@ -35,6 +37,8 @@ async function main() {
     console.log('Could not build cart link automatically.');
   }
 }
+
+const main = withTrace('main', _main);
 
 main().catch((err) => {
   log.error(err);

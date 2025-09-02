@@ -4,6 +4,7 @@ import { fetchProductJson } from '../shops/culturekings/productJson.js';
 import { fetchProductFromHtml } from '../shops/culturekings/htmlParser.js';
 import { matchVariant } from '../core/match.js';
 import { rankSuggestions } from '../core/rank.js';
+import { withTrace } from '../core/trace.js';
 
 async function resolveHandle(handle: string) {
   try {
@@ -43,7 +44,7 @@ async function suggestForItem(item: IntentItem): Promise<Suggestion[]> {
   return rankSuggestions(suggestions, item);
 }
 
-export async function plan(intent: Intent): Promise<Record<'shirt' | 'pants', Suggestion[]>> {
+async function _plan(intent: Intent): Promise<Record<'shirt' | 'pants', Suggestion[]>> {
   const result: Record<'shirt' | 'pants', Suggestion[]> = { shirt: [], pants: [] };
   for (const item of intent.items) {
     const sugs = await suggestForItem(item);
@@ -51,3 +52,5 @@ export async function plan(intent: Intent): Promise<Record<'shirt' | 'pants', Su
   }
   return result;
 }
+
+export const plan = withTrace('plan', _plan);
