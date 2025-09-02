@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import OpenAI from 'openai';
 import type { Intent, IntentItem } from '../core/types.js';
+import { withTrace } from '../core/trace.js';
 
 const itemSchema = z.object({
   category: z.enum(['shirt', 'pants']),
@@ -14,7 +15,7 @@ const intentSchema = z.object({
   notes: z.string().optional(),
 });
 
-export async function parseIntent(input: string): Promise<Intent> {
+async function _parseIntent(input: string): Promise<Intent> {
   const key = process.env.OPENAI_API_KEY;
   if (key) {
     try {
@@ -52,3 +53,5 @@ export async function parseIntent(input: string): Promise<Intent> {
 
   return { items };
 }
+
+export const parseIntent = withTrace('parseIntent', _parseIntent);

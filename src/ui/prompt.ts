@@ -1,14 +1,15 @@
 import inquirer from 'inquirer';
 import type { Suggestion } from '../core/types.js';
+import { withTrace } from '../core/trace.js';
 
-export async function askDescription(): Promise<string> {
+async function _askDescription(): Promise<string> {
   const { desc } = await inquirer.prompt<{ desc: string }>([
     { type: 'input', name: 'desc', message: 'Describe what you want:' },
   ]);
   return desc;
 }
 
-export async function pickSuggestion(sugs: Suggestion[], label: string): Promise<Suggestion | null> {
+async function _pickSuggestion(sugs: Suggestion[], label: string): Promise<Suggestion | null> {
   if (sugs.length === 0) return null;
 
   const choices = sugs.map((s, i) => ({
@@ -24,3 +25,6 @@ export async function pickSuggestion(sugs: Suggestion[], label: string): Promise
 
   return sugs[idx];
 }
+
+export const askDescription = withTrace('askDescription', _askDescription);
+export const pickSuggestion = withTrace('pickSuggestion', _pickSuggestion);
